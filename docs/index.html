@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Infinity X 4.1 Emulator · Unofficial x86_64 image</title>
+<meta name="description" content="UNOFFICIAL community build of Project Infinity X 4.1 (Android 17) for the Android Emulator on x86_64, made to help developers test apps and features quickly.">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060d; --bg2:#0b0e1c; --card:#10142a; --card2:#141a36; --line:#232a52;
+  --ink:#eef1ff; --mute:#9aa3c7; --blue:#2f6bff; --blue2:#5ea1ff; --cyan:#58d6ff;
+  --pink:#ff3d8b; --red:#ff3b3b; --warn:#ffb020; --ok:#3ddc97;
+  --r:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 Outfit,system-ui,sans-serif;overflow-x:hidden}
+a{color:var(--blue2);text-decoration:none} a:hover{text-decoration:underline}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* glow background */
+.glow{position:fixed;inset:-20vh -20vw auto auto;width:80vw;height:80vw;max-width:1100px;max-height:1100px;
+  background:radial-gradient(closest-side,rgba(47,107,255,.35),transparent 70%);filter:blur(20px);pointer-events:none;z-index:0}
+.glow.b{inset:auto auto -30vh -25vw;background:radial-gradient(closest-side,rgba(255,61,139,.18),transparent 70%)}
+main,header,footer{position:relative;z-index:1}
+
+/* banner */
+.banner{position:sticky;top:0;z-index:5;background:linear-gradient(90deg,#3a1300,#4a2a00);border-bottom:1px solid #6b4200;
+  color:#ffd9a0;font-size:14px;text-align:center;padding:8px 16px}
+.banner b{color:#fff}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.logo{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.2px}
+.logo .inf{font-size:30px;line-height:1;background:linear-gradient(135deg,var(--cyan),var(--blue) 50%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+nav .links{display:flex;gap:22px;font-size:15px}
+nav .links a{color:var(--mute)} nav .links a:hover{color:var(--ink);text-decoration:none}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding:40px 0 70px}
+.tag{display:inline-flex;gap:8px;align-items:center;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--warn);border:1px solid #5a4210;background:#1d1606;padding:6px 12px;border-radius:999px}
+h1{font-size:clamp(42px,6.2vw,78px);line-height:1.02;margin:18px 0 18px;font-weight:800;letter-spacing:-.02em}
+h1 .grad{background:linear-gradient(120deg,#fff 10%,var(--blue2) 45%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 .x{color:var(--red)}
+.lead{font-size:19px;color:var(--mute);max-width:560px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 30px}
+.chip{font-size:13px;padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:#cfd6ff}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:999px;font-weight:600;font-size:16px;border:1px solid transparent;transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{text-decoration:none;transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,var(--blue),#7a4dff);color:#fff;box-shadow:0 10px 30px -10px rgba(47,107,255,.8)}
+.btn.ghost{background:var(--card);border-color:var(--line);color:var(--ink)}
+.sha{margin-top:18px;font-size:12px;color:var(--mute);word-break:break-all}
+.sha b{color:#cfd6ff;font-weight:600}
+
+/* phone */
+.phone{justify-self:center;position:relative;width:min(320px,80vw);aspect-ratio:9/20;border-radius:46px;padding:10px;
+  background:linear-gradient(160deg,#2b3157,#0b0e1c);box-shadow:0 40px 90px -30px rgba(47,107,255,.6),inset 0 0 0 1px #3a427a}
+.phone img{width:100%;height:100%;object-fit:cover;border-radius:37px;display:block}
+.phone::after{content:"";position:absolute;top:22px;left:50%;width:14px;height:14px;border-radius:50%;background:#000;transform:translateX(-50%)}
+
+section{padding:70px 0}
+h2{font-size:clamp(30px,4vw,44px);margin:0 0 10px;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 36px;max-width:680px}
+
+/* gallery */
+.gallery{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 4px 18px}
+.gallery figure{margin:0;flex:0 0 220px;scroll-snap-align:start}
+.gallery img{width:220px;aspect-ratio:9/20;object-fit:cover;border-radius:26px;border:1px solid var(--line);background:var(--card)}
+.gallery figcaption{font-size:14px;color:var(--mute);text-align:center;margin-top:10px}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.card h3{margin:0 0 6px;font-size:19px}
+.card p{margin:0;color:var(--mute);font-size:15px}
+.ico{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;margin-bottom:14px;font-size:20px;
+  background:linear-gradient(135deg,rgba(47,107,255,.25),rgba(255,61,139,.18));border:1px solid var(--line)}
+
+/* steps */
+.steps{counter-reset:s;display:grid;gap:14px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+.step::before{counter-increment:s;content:counter(s);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:linear-gradient(135deg,var(--blue),#7a4dff)}
+.step h3{margin:6px 0 6px;font-size:18px}
+.step p{margin:0 0 8px;color:var(--mute)}
+pre{position:relative;margin:8px 0 0;background:#070912;border:1px solid var(--line);border-radius:14px;padding:14px 16px;overflow-x:auto;font-size:13.5px;color:#d9e0ff}
+.copy{position:absolute;top:8px;right:8px;font:600 12px Outfit,sans-serif;color:var(--ink);background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
+.copy:hover{border-color:var(--blue2)}
+
+/* tables */
+.specs{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.specs td{padding:13px 18px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:top}
+.specs tr:last-child td{border-bottom:0}
+.specs td:first-child{color:var(--mute);width:34%}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+ul.x,ul.ok{margin:0;padding:0;list-style:none}
+ul.x li,ul.ok li{padding:8px 0 8px 30px;position:relative;color:#d6dcff;border-bottom:1px dashed var(--line)}
+ul.x li:last-child,ul.ok li:last-child{border-bottom:0}
+ul.ok li::before{content:"✓";position:absolute;left:4px;color:var(--ok);font-weight:700}
+ul.x li::before{content:"✕";position:absolute;left:4px;color:var(--pink);font-weight:700}
+
+.patch{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.patch:last-child{border-bottom:0}
+.patch .n{font-family:"JetBrains Mono",monospace;font-size:13px;color:#d9e0ff;word-break:break-all}
+.patch .r{font-size:12px;color:var(--mute)}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.pill.g{background:#0d2a1e;color:var(--ok);border:1px solid #1b5a3d}
+.pill.y{background:#2a2108;color:var(--warn);border:1px solid #5a4210}
+.pill.r{background:#2a0d18;color:var(--pink);border:1px solid #5a1b33}
+
+.disclaimer{border:1px solid #5a4210;background:linear-gradient(180deg,#1d1606,#120e05);border-radius:var(--r);padding:26px}
+.disclaimer h2{color:var(--warn);font-size:28px}
+.disclaimer p{color:#f1dcb0;margin:8px 0}
+footer{padding:40px 0 60px;color:var(--mute);font-size:14px;border-top:1px solid var(--line);margin-top:30px}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:40px;padding-top:20px}
+  .grid{grid-template-columns:1fr 1fr}
+  .cols{grid-template-columns:1fr}
+  nav .links{display:none}
+}
+@media (max-width:560px){
+  .grid{grid-template-columns:1fr}
+  .wrap{padding:0 16px}
+  .step{grid-template-columns:1fr}
+  .patch{flex-direction:column;align-items:flex-start}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+<div class="banner"><b>UNOFFICIAL</b> community build, not made or supported by the Project Infinity X team. For developer testing only.</div>
+<div class="glow"></div><div class="glow b"></div>
+
+<header class="wrap">
+  <nav>
+    <div class="logo"><span class="inf">∞</span><span>Infinity X · Emulator <span style="color:var(--mute);font-weight:400">(unofficial)</span></span></div>
+    <div class="links"><a href="#screens">Screens</a><a href="#install">Install</a><a href="#tips">Tips</a><a href="#build">Build</a><a href="#faq">FAQ</a></div>
+  </nav>
+</header>
+
+<main class="wrap">
+  <section class="hero" style="padding-top:20px">
+    <div>
+      <span class="tag">⚠ Unofficial · Developer build</span>
+      <h1><span class="grad">Infinity X 4.1</span><br>on your desktop<span class="x">.</span></h1>
+      <p class="lead">An x86_64 Android&nbsp;17 system image of Project Infinity X for the Android Emulator. Test apps, themes and UI features in seconds instead of flashing a phone.</p>
+      <div class="chips">
+        <span class="chip">Android 17 · API 37</span><span class="chip">Patch 2026‑10‑01</span><span class="chip">x86_64</span><span class="chip">userdebug</span><span class="chip">Vanilla · no GApps</span><span class="chip">~1.1 GB download</span>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/releases/latest">⬇ Download image</a>
+        <a class="btn ghost" href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial">GitHub repo</a>
+      </div>
+      <div class="sha">SHA‑256 <b class="mono">e6aafcddcfd24e1204c0ea35f10cfa737d955147a40bc75831d5651b0816df60</b></div>
+    </div>
+    <div class="phone"><img src="assets/lockscreen.webp" alt="Infinity X lockscreen running in the Android Emulator" width="540" height="1200"></div>
+  </section>
+
+  <section id="screens">
+    <h2>Real screenshots</h2>
+    <p class="sub">Captured from this exact image in the Android Emulator, with nothing edited.</p>
+    <div class="gallery">
+      <figure><img src="assets/lockscreen.webp" alt="Lockscreen with the Infinity X clock" loading="lazy"><figcaption>Lockscreen</figcaption></figure>
+      <figure><img src="assets/settings.webp" alt="Settings home with the Infinity X header" loading="lazy"><figcaption>Settings</figcaption></figure>
+      <figure><img src="assets/infinity-suite.webp" alt="Infinity Suite customization hub" loading="lazy"><figcaption>Infinity Suite</figcaption></figure>
+      <figure><img src="assets/quicksettings.webp" alt="Quick settings panel" loading="lazy"><figcaption>Quick settings</figcaption></figure>
+      <figure><img src="assets/apps.webp" alt="Launcher app drawer" loading="lazy"><figcaption>Launcher3</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>What it's good for</h2>
+    <p class="sub">Anything that lives in the framework, SystemUI, Settings or launcher.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">🎨</div><h3>Themes &amp; overlays</h3><p>Infinity Suite, Monet, QS styles, lockscreen clocks, icon packs and fonts, all working.</p></div>
+      <div class="card"><div class="ico">🪟</div><h3>Freeform &amp; sidebar</h3><p>Test how your app behaves in floating windows and the sidebar without a device.</p></div>
+      <div class="card"><div class="ico">☝</div><h3>Fingerprint flows</h3><p>Ten virtual fingers in the emulator's extended controls, useful for per-finger logic.</p></div>
+      <div class="card"><div class="ico">🧩</div><h3>App compatibility</h3><p>Check your app on Android 17 with a custom-ROM framework before your users do.</p></div>
+      <div class="card"><div class="ico">🛠</div><h3>ROM development</h3><p>Reproduce SystemUI or Settings bugs and test patches, with <code>adb</code>, logcat and a userdebug build.</p></div>
+      <div class="card"><div class="ico">⚡</div><h3>Fast iteration</h3><p>Cold boot in about a minute on a laptop, with no unlocking, flashing or bricking risk.</p></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Install</h2>
+    <p class="sub">x86_64 host with hardware virtualization (KVM / HVF / WHPX), Android SDK with Emulator 36+, <code>zstd</code>, 8 GB RAM and ~10 GB free disk. Apple Silicon Macs can't run x86_64 images.</p>
+    <div class="steps">
+      <div class="step"><div><h3>Download the image</h3><p>Grab <span class="mono">InfinityX-4.1-UNOFFICIAL-emulator-x86_64-20261024.tar.zst</span> from the <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/releases/latest">latest release</a>.</p></div></div>
+      <div class="step"><div><h3>Run the installer (Linux / Intel macOS)</h3><p>It checks the SHA‑256, extracts the image into your SDK and creates an AVD named <code>InfinityX</code>.</p>
+<pre><button class="copy">Copy</button>git clone https://github.com/Necta14/infinityx-emulator-x86_64-unofficial
+cd infinityx-emulator-x86_64-unofficial
+./scripts/install.sh ~/Downloads/InfinityX-4.1-UNOFFICIAL-emulator-x86_64-20261024.tar.zst</pre></div></div>
+      <div class="step"><div><h3>Start it</h3>
+<pre><button class="copy">Copy</button>$ANDROID_SDK_ROOT/emulator/emulator -avd InfinityX</pre>
+<p style="margin-top:10px">Windows (untested): extract with a Zstandard-capable tool into <span class="mono">…\Sdk\system-images\android-37\infinityx\</span> and create the AVD files shown in <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/scripts/install.sh">install.sh</a>.</p></div></div>
+    </div>
+  </section>
+
+  <section id="tips">
+    <h2>Tips</h2>
+    <p class="sub">Small things that save time.</p>
+    <table class="specs">
+      <tr><td>Black screen / artifacts</td><td>Start with <code>-gpu host</code>, or <code>-gpu swiftshader_indirect</code> as a fallback.</td></tr>
+      <tr><td>Start clean</td><td><code>-wipe-data</code> resets the AVD; <code>-no-snapshot</code> forces a cold boot.</td></tr>
+      <tr><td>Fingerprints</td><td>Extended controls (<b>…</b>) → <b>Fingerprint</b>: enroll several fingers and touch the virtual sensor.</td></tr>
+      <tr><td>Root shell</td><td>userdebug build, so try <code>adb root</code> first.</td></tr>
+      <tr><td>No setup wizard</td><td>Normal for a vanilla build. It boots straight into the launcher.</td></tr>
+      <tr><td>Performance</td><td>Give the AVD 4 cores and 4 GB of RAM (the defaults the installer sets), and keep the image on an SSD.</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="cols">
+      <div class="card"><h3>Works</h3><ul class="ok">
+        <li>Infinity Suite and theming</li><li>Launcher3, QS panel, lockscreen</li><li>Freeform windows and sidebar</li><li>Settings, Game Space, Recorder</li><li>adb, logcat, virtual sensors</li></ul></div>
+      <div class="card"><h3>Not included / won't work</h3><ul class="x">
+        <li>Google apps and Play Store (vanilla)</li><li>FaceUnlock (ARM-only libraries)</li><li>Real camera, Dolby, device features</li><li>Official signing keys and OTA</li><li>Running on real phones (emulator only!)</li></ul></div>
+    </div>
+  </section>
+
+  <section id="build">
+    <h2>Build it yourself</h2>
+    <p class="sub">The upstream emulator target didn't build out of the box. The full story and the five fixes are in <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/BUILD.md">BUILD.md</a>.</p>
+    <div class="card" style="padding:0">
+      <div class="patch"><div><div class="n">0001-sdk_phone_x86_64-make-the-emulator-target-build-as-I…</div><div class="r">vendor/infinity · wrong include, Lineage product name, artifact path check</div></div><span class="pill g">Upstream-ready</span></div>
+      <div class="patch"><div><div class="n">0001-emu64x-tolerate-missing-ARM-only-required-modules</div><div class="r">device/generic/goldfish · FaceUnlock's ARM-only prebuilts</div></div><span class="pill y">Emulator only</span></div>
+      <div class="patch"><div><div class="n">0002-LOCAL-ONLY-DO-NOT-MERGE-common-default-FaceUnlock…</div><div class="r">vendor/infinity · applied in this build, not needed, changes every device</div></div><span class="pill r">Local only</span></div>
+    </div>
+<pre><button class="copy">Copy</button>scripts/apply-fixes.sh /path/to/infinity-x-src
+source build/envsetup.sh &amp;&amp; lunch infinity_sdk_phone_x86_64-userdebug
+export INFINITY_BUILD=emu64x   # avoids duplicate ro.infinity.device
+m &amp;&amp; scripts/pack-emulator-image.sh out/target/product/emu64x ./dist</pre>
+  </section>
+
+  <section id="faq">
+    <h2>FAQ</h2>
+    <table class="specs">
+      <tr><td>Is this official?</td><td><b>No.</b> It is an unofficial community build. Please don't ask the Infinity X groups for support with it.</td></tr>
+      <tr><td>Can I flash it on my phone?</td><td>No. It is built for the emulator's virtual hardware only.</td></tr>
+      <tr><td>Is it safe?</td><td>Built from public sources with the patches published here. Verify the SHA‑256 and inspect the build notes. It is not signed with official keys.</td></tr>
+      <tr><td>Found a bug?</td><td>Check it on a real device first. If it only happens here, open an issue in this repo.</td></tr>
+      <tr><td>Kernel source?</td><td>See <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/NOTICE.md">NOTICE.md</a> (Android Common Kernel 6.12.58).</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="disclaimer">
+      <h2>Unofficial. Please read.</h2>
+      <p>This image is <b>not</b> made, endorsed or supported by the Project Infinity X team, LineageOS or Google. It exists to help developers test apps and features faster. Use it at your own risk and never as a daily driver.</p>
+      <p>All credit for Infinity X goes to its team and contributors. If you like what you see here, support the <a href="https://projectinfinity-x.com">official project</a>. "Infinity X" names belong to their owners and are used only to describe what this build is based on.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  Unofficial build by <a href="https://github.com/Necta14">Necta14</a> · Built 2026‑10‑24 from Project Infinity X 4.1 sources ·
+  Scripts &amp; docs Apache‑2.0 · <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/NOTICE.md">Notices &amp; licenses</a>
+</footer>
+
+<script>
+document.querySelectorAll('pre .copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=b.parentElement.innerText.replace(/^Copy\s*/,'').replace(/^Copied\s*/,'');
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){
+      b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400);
+    }).catch(function(){b.textContent='Select & copy';});
+  });
+});
+</script>
+</body>
+</html>

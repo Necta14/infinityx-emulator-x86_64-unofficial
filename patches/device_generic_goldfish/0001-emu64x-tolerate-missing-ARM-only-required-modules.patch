@@ -1,0 +1,31 @@
+From 2827f56620b2297db9ad25ca21532c96fdc942c2 Mon Sep 17 00:00:00 2001
+From: Necta14 <179446771+Necta14@users.noreply.github.com>
+Date: Sun, 25 Oct 2026 09:19:18 +0200
+Subject: [PATCH] emu64x: tolerate missing ARM-only required modules
+
+Infinity X ships FaceUnlock, whose 'required' prebuilts
+(libMegviiUnlock, libmegface_faceunlock, libFaceDetectCA,
+libMegviiUnlock-jni-1.2) exist only for arm64. On the x86_64 emulator
+target this aborts kati with "requires non-existent TARGET module".
+Let the build continue; FaceUnlock is simply not functional on the
+emulator.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ board/emu64x/BoardConfig.mk | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/board/emu64x/BoardConfig.mk b/board/emu64x/BoardConfig.mk
+index 95f0e1c..9b70185 100644
+--- a/board/emu64x/BoardConfig.mk
++++ b/board/emu64x/BoardConfig.mk
+@@ -22,3 +22,6 @@ TARGET_2ND_ARCH_VARIANT := x86_64
+ include device/generic/goldfish/board/BoardConfigCommon.mk
+ 
+ BOARD_USERDATAIMAGE_PARTITION_SIZE := 576716800
++
++# Infinity X x86_64 emulator: FaceUnlock declares ARM-only required modules
++BUILD_BROKEN_MISSING_REQUIRED_MODULES := true
+-- 
+2.56.0
+

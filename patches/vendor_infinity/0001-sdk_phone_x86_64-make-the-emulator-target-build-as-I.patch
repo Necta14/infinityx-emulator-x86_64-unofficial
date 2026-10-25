@@ -1,0 +1,57 @@
+From 7206f3d9dfbcac17f172cef5f178e0af3492a9ff Mon Sep 17 00:00:00 2001
+From: Necta14 <179446771+Necta14@users.noreply.github.com>
+Date: Sun, 25 Oct 2026 09:19:18 +0200
+Subject: [PATCH 1/2] sdk_phone_x86_64: make the emulator target build as
+ Infinity X
+
+The x86_64 SDK target was carried over from LineageOS without being
+adapted:
+
+* it includes lineage_generic_target.mk, which does not exist in
+  vendor/infinity (the file is infinity_generic_target.mk), so lunch
+  fails and the build silently falls back to another product;
+* PRODUCT_NAME is still lineage_sdk_phone_x86_64;
+* 'relaxed' artifact path enforcement still aborts soong because
+  Infinity X installs OmniStyle into system/priv-app, which is inside
+  generic_system.mk's artifact path requirement;
+* FaceUnlock is pulled in by default but its prebuilts are ARM-only.
+
+Tested: lunch infinity_sdk_phone_x86_64-userdebug && m (v4.1, A17).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ build/target/product/infinity_sdk_phone_x86_64.mk | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/build/target/product/infinity_sdk_phone_x86_64.mk b/build/target/product/infinity_sdk_phone_x86_64.mk
+index f737370..748c754 100644
+--- a/build/target/product/infinity_sdk_phone_x86_64.mk
++++ b/build/target/product/infinity_sdk_phone_x86_64.mk
+@@ -14,18 +14,20 @@
+ 
+ $(call inherit-product, device/generic/goldfish/64bitonly/product/sdk_phone64_x86_64.mk)
+ 
+-include vendor/infinity/build/target/product/lineage_generic_target.mk
++# Emulator x86_64: the FaceUnlock (Megvii) prebuilts only exist for ARM
++TARGET_FACE_UNLOCK_SUPPORTED := false
++include vendor/infinity/build/target/product/infinity_generic_target.mk
+ include device/generic/goldfish/board/kernel/x86_64.mk
+ 
+ # Always build modules from source
+ PRODUCT_MODULE_BUILD_FROM_SOURCE := true
+ 
+ # Enable mainline checking
+-PRODUCT_ENFORCE_ARTIFACT_PATH_REQUIREMENTS := relaxed
++PRODUCT_ENFORCE_ARTIFACT_PATH_REQUIREMENTS := false
+ 
+ # Overrides
+-PRODUCT_NAME := lineage_sdk_phone_x86_64
+-PRODUCT_MODEL := LineageOS Android SDK built for x86_64
++PRODUCT_NAME := infinity_sdk_phone_x86_64
++PRODUCT_MODEL := Infinity X 4.1 Emulator x86_64
+ 
+ PRODUCT_SDK_ADDON_NAME := lineage
+ PRODUCT_SDK_ADDON_SYS_IMG_SOURCE_PROP := $(LOCAL_PATH)/source.properties
+-- 
+2.56.0
+

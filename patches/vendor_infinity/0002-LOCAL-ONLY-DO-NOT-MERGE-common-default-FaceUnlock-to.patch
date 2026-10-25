@@ -1,0 +1,33 @@
+From 25db343ee761a3f0b9881c1ce09a34e92fe9d7f2 Mon Sep 17 00:00:00 2001
+From: Necta14 <179446771+Necta14@users.noreply.github.com>
+Date: Sun, 25 Oct 2026 09:19:18 +0200
+Subject: [PATCH 2/2] [LOCAL ONLY - DO NOT MERGE] common: default FaceUnlock to
+ off
+
+Applied in the published emulator build while chasing the FaceUnlock
+missing-module error. It was NOT sufficient on its own (the goldfish
+BoardConfig change is what fixed it) and it changes the default for
+every device, so it must not go upstream. Kept only so the published
+image's configuration can be reproduced exactly.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ config/common.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/config/common.mk b/config/common.mk
+index bf67ca7..5ad1c9f 100644
+--- a/config/common.mk
++++ b/config/common.mk
+@@ -245,7 +245,7 @@ PRODUCT_PACKAGES += \
+ endif
+     
+ # FaceUnlock
+-TARGET_FACE_UNLOCK_SUPPORTED ?= $(TARGET_SUPPORTS_64_BIT_APPS)
++TARGET_FACE_UNLOCK_SUPPORTED ?= false
+ TARGET_PROVIDES_FACE_UNLOCK_HAL ?= false
+ 
+ ifeq ($(TARGET_PROVIDES_FACE_UNLOCK_HAL), false)
+-- 
+2.56.0
+
