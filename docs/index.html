@@ -3,276 +3,465 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Infinity X 4.1 Emulator · Unofficial x86_64 image</title>
-<meta name="description" content="UNOFFICIAL community build of Project Infinity X 4.1 (Android 17) for the Android Emulator on x86_64, made to help developers test apps and features quickly.">
+<title>Infinity X Emulator Image</title>
+<meta name="description" content="Unofficial community build of Project Infinity X 4.1 (Android 17) for the Android Emulator on x86_64, made to help developers test apps and features quickly.">
 <meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#111318">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,300..900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0&display=block" rel="stylesheet">
 <style>
+/* Material 3 dark scheme, seed taken from the Infinity X wallpaper blue (#2F5FD8) */
 :root{
-  --bg:#05060d; --bg2:#0b0e1c; --card:#10142a; --card2:#141a36; --line:#232a52;
-  --ink:#eef1ff; --mute:#9aa3c7; --blue:#2f6bff; --blue2:#5ea1ff; --cyan:#58d6ff;
-  --pink:#ff3d8b; --red:#ff3b3b; --warn:#ffb020; --ok:#3ddc97;
-  --r:22px;
+  --surface:#111318; --surface-low:#191C21; --surface-c:#1D2026; --surface-high:#282A30; --surface-highest:#33353B;
+  --on-surface:#E2E2E9; --on-surface-v:#C4C6D0; --outline:#8E9099; --outline-v:#44474F;
+  --primary:#B1C5FF; --on-primary:#002C71; --primary-c:#1F4396; --on-primary-c:#DAE2FF;
+  --secondary-c:#3F4759; --on-secondary-c:#DBE2F9;
+  --tertiary:#FFB4AA; --tertiary-c:#93000F; --on-tertiary-c:#FFDAD5;
+  --caution-c:#4F2500; --on-caution-c:#FFDCC2; --caution:#FFB77C;
+  --e-emph:cubic-bezier(.05,.7,.1,1); --e-std:cubic-bezier(.2,0,0,1);
+  --shape-s:8px; --shape-m:12px; --shape-l:16px; --shape-xl:28px;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 Outfit,system-ui,sans-serif;overflow-x:hidden}
-a{color:var(--blue2);text-decoration:none} a:hover{text-decoration:underline}
-code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
-.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--surface);color:var(--on-surface);font:400 16px/1.55 "Roboto Flex",Roboto,system-ui,sans-serif;font-variation-settings:"opsz" 16}
+a{color:var(--primary)}
+.ms{font-family:"Material Symbols Rounded";font-weight:400;font-style:normal;font-size:24px;line-height:1;display:inline-block;-webkit-font-smoothing:antialiased;font-variation-settings:"FILL" 0,"wght" 400,"opsz" 24;user-select:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+:focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:6px}
 
-/* glow background */
-.glow{position:fixed;inset:-20vh -20vw auto auto;width:80vw;height:80vw;max-width:1100px;max-height:1100px;
-  background:radial-gradient(closest-side,rgba(47,107,255,.35),transparent 70%);filter:blur(20px);pointer-events:none;z-index:0}
-.glow.b{inset:auto auto -30vh -25vw;background:radial-gradient(closest-side,rgba(255,61,139,.18),transparent 70%)}
-main,header,footer{position:relative;z-index:1}
+/* top app bar */
+.appbar{position:sticky;top:0;z-index:20;background:var(--surface);transition:background .3s var(--e-std),box-shadow .3s var(--e-std)}
+.appbar.scrolled{background:var(--surface-c);box-shadow:0 1px 0 var(--outline-v)}
+.appbar .wrap{display:flex;align-items:center;height:64px;gap:16px}
+.brand{font-size:22px;font-weight:500;letter-spacing:0;display:flex;align-items:center;gap:10px;color:var(--on-surface);text-decoration:none}
+.brand .ms{color:var(--primary);font-size:28px}
+.nav{margin-left:auto;display:flex;gap:4px}
+.nav a{color:var(--on-surface-v);text-decoration:none;font-weight:500;font-size:14px;padding:10px 14px;border-radius:20px;position:relative;overflow:hidden}
+.nav a:hover{background:rgba(196,198,208,.08);color:var(--on-surface)}
 
-/* banner */
-.banner{position:sticky;top:0;z-index:5;background:linear-gradient(90deg,#3a1300,#4a2a00);border-bottom:1px solid #6b4200;
-  color:#ffd9a0;font-size:14px;text-align:center;padding:8px 16px}
-.banner b{color:#fff}
-
-nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
-.logo{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.2px}
-.logo .inf{font-size:30px;line-height:1;background:linear-gradient(135deg,var(--cyan),var(--blue) 50%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
-nav .links{display:flex;gap:22px;font-size:15px}
-nav .links a{color:var(--mute)} nav .links a:hover{color:var(--ink);text-decoration:none}
+/* banner (M3) */
+.banner{background:var(--caution-c);color:var(--on-caution-c);border-radius:var(--shape-l);display:flex;gap:16px;align-items:flex-start;padding:16px 20px;margin:12px 0 0}
+.banner .ms{color:var(--caution);font-variation-settings:"FILL" 1,"wght" 400,"opsz" 24}
+.banner p{margin:0;max-width:78ch}
+.banner b{color:#fff;font-weight:600}
 
 /* hero */
-.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding:40px 0 70px}
-.tag{display:inline-flex;gap:8px;align-items:center;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--warn);border:1px solid #5a4210;background:#1d1606;padding:6px 12px;border-radius:999px}
-h1{font-size:clamp(42px,6.2vw,78px);line-height:1.02;margin:18px 0 18px;font-weight:800;letter-spacing:-.02em}
-h1 .grad{background:linear-gradient(120deg,#fff 10%,var(--blue2) 45%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
-h1 .x{color:var(--red)}
-.lead{font-size:19px;color:var(--mute);max-width:560px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 30px}
-.chip{font-size:13px;padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:#cfd6ff}
-.cta{display:flex;flex-wrap:wrap;gap:12px}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:999px;font-weight:600;font-size:16px;border:1px solid transparent;transition:transform .15s ease,box-shadow .15s ease}
-.btn:hover{text-decoration:none;transform:translateY(-1px)}
-.btn.primary{background:linear-gradient(135deg,var(--blue),#7a4dff);color:#fff;box-shadow:0 10px 30px -10px rgba(47,107,255,.8)}
-.btn.ghost{background:var(--card);border-color:var(--line);color:var(--ink)}
-.sha{margin-top:18px;font-size:12px;color:var(--mute);word-break:break-all}
-.sha b{color:#cfd6ff;font-weight:600}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:56px;align-items:center;padding:56px 0 72px}
+.hero h1{margin:0 0 20px;font-weight:650;font-size:clamp(44px,6.4vw,86px);line-height:.98;letter-spacing:-.02em;font-variation-settings:"wdth" 118,"opsz" 144}
+.hero h1 small{display:block;font-size:.42em;line-height:1.15;font-weight:420;letter-spacing:-.005em;color:var(--on-surface-v);margin-top:14px;font-variation-settings:"wdth" 100,"opsz" 48}
+.hero .lead{font-size:18px;color:var(--on-surface-v);max-width:52ch;margin:0 0 28px}
+.chipset{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 32px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 14px 0 10px;border-radius:var(--shape-s);border:1px solid var(--outline-v);color:var(--on-surface-v);font-size:14px;font-weight:500}
+.chip .ms{font-size:18px;color:var(--primary)}
+.chip.warn{border-color:transparent;background:var(--caution-c);color:var(--on-caution-c)}
+.chip.warn .ms{color:var(--caution)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 24px 0 18px;border-radius:24px;font:500 15px/1 "Roboto Flex",sans-serif;letter-spacing:.01em;text-decoration:none;border:0;cursor:pointer;transition:box-shadow .2s var(--e-std)}
+.btn .ms{font-size:20px}
+.btn.filled{background:var(--primary);color:var(--on-primary)}
+.btn.filled:hover{box-shadow:0 1px 3px rgba(0,0,0,.4),0 4px 8px 3px rgba(0,0,0,.25)}
+.btn.tonal{background:var(--secondary-c);color:var(--on-secondary-c)}
+.btn.text{background:transparent;color:var(--primary);padding:0 16px}
+.btn::after{content:"";position:absolute;inset:0;background:currentColor;opacity:0;transition:opacity .2s var(--e-std)}
+.btn:hover::after{opacity:.08}.btn:active::after{opacity:.12}
+.ripple{position:absolute;border-radius:50%;transform:scale(0);background:currentColor;opacity:.18;pointer-events:none;animation:rip .55s var(--e-std) forwards}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+.hash{margin-top:22px;font-size:13px;color:var(--outline);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hash code{font-family:"Roboto Mono",monospace;color:var(--on-surface-v);font-size:12.5px;word-break:break-all}
+.iconbtn{position:relative;overflow:hidden;width:36px;height:36px;border-radius:18px;border:0;background:transparent;color:var(--on-surface-v);cursor:pointer;display:inline-grid;place-items:center}
+.iconbtn:hover{background:rgba(196,198,208,.08)}
 
-/* phone */
-.phone{justify-self:center;position:relative;width:min(320px,80vw);aspect-ratio:9/20;border-radius:46px;padding:10px;
-  background:linear-gradient(160deg,#2b3157,#0b0e1c);box-shadow:0 40px 90px -30px rgba(47,107,255,.6),inset 0 0 0 1px #3a427a}
-.phone img{width:100%;height:100%;object-fit:cover;border-radius:37px;display:block}
-.phone::after{content:"";position:absolute;top:22px;left:50%;width:14px;height:14px;border-radius:50%;background:#000;transform:translateX(-50%)}
+/* device: modest radii so the status bar is fully visible */
+.device{justify-self:center;width:min(330px,78vw);aspect-ratio:1080/2400;position:relative;border-radius:26px;padding:9px;background:#24262C;box-shadow:0 0 0 1px #3A3D45,0 30px 60px -20px rgba(0,0,0,.7),0 0 0 6px #17191E}
+.device .screen{position:relative;width:100%;height:100%;border-radius:18px;overflow:hidden;background:#000}
+.device .screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.04);transition:opacity .7s var(--e-std),transform 1.2s var(--e-emph)}
+.device .screen img.on{opacity:1;transform:scale(1)}
+.device .btns{position:absolute;right:-9px;top:22%;width:3px;height:64px;border-radius:2px;background:#3A3D45}
+.device .btns::after{content:"";position:absolute;top:84px;left:0;width:3px;height:36px;border-radius:2px;background:#3A3D45}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:18px}
+.dots button{width:8px;height:8px;border-radius:4px;border:0;padding:0;background:var(--outline-v);cursor:pointer;transition:width .35s var(--e-emph),background .35s var(--e-std)}
+.dots button.on{width:24px;background:var(--primary)}
 
-section{padding:70px 0}
-h2{font-size:clamp(30px,4vw,44px);margin:0 0 10px;font-weight:700;letter-spacing:-.01em}
-.sub{color:var(--mute);margin:0 0 36px;max-width:680px}
+/* sections */
+section{padding:72px 0}
+h2{font-weight:600;font-size:clamp(30px,3.6vw,44px);line-height:1.1;letter-spacing:-.01em;margin:0 0 12px;font-variation-settings:"wdth" 112,"opsz" 96}
+.sub{color:var(--on-surface-v);max-width:62ch;margin:0 0 36px;font-size:17px}
 
-/* gallery */
-.gallery{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 4px 18px}
-.gallery figure{margin:0;flex:0 0 220px;scroll-snap-align:start}
-.gallery img{width:220px;aspect-ratio:9/20;object-fit:cover;border-radius:26px;border:1px solid var(--line);background:var(--card)}
-.gallery figcaption{font-size:14px;color:var(--mute);text-align:center;margin-top:10px}
+/* marquee */
+.marquee{position:relative;overflow:hidden;padding:8px 0 4px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.track{display:flex;gap:20px;width:max-content;animation:slide var(--dur,48s) linear infinite}
+.marquee:hover .track,.marquee:focus-within .track{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(var(--shift,-50%))}}
+.shot{margin:0;flex:0 0 auto;width:212px}
+.shot .frame{border-radius:16px;padding:6px;background:#24262C;box-shadow:0 0 0 1px #3A3D45}
+.shot img{display:block;width:100%;aspect-ratio:1080/2400;border-radius:11px;object-fit:cover;background:#000}
+.shot figcaption{font-size:14px;font-weight:500;color:var(--on-surface-v);text-align:center;margin-top:12px}
 
-/* cards */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:var(--r);padding:22px}
-.card h3{margin:0 0 6px;font-size:19px}
-.card p{margin:0;color:var(--mute);font-size:15px}
-.ico{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;margin-bottom:14px;font-size:20px;
-  background:linear-gradient(135deg,rgba(47,107,255,.25),rgba(255,61,139,.18));border:1px solid var(--line)}
+/* feature list: M3 list, two columns */
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:4px 32px;margin:0;padding:0;list-style:none}
+.feat li{display:grid;grid-template-columns:48px 1fr;gap:16px;padding:16px 8px;border-radius:var(--shape-m);align-items:start}
+.feat .ic{width:48px;height:48px;border-radius:var(--shape-m);display:grid;place-items:center;background:var(--primary-c);color:var(--on-primary-c)}
+.feat h3{margin:2px 0 4px;font-size:18px;font-weight:550}
+.feat p{margin:0;color:var(--on-surface-v);font-size:15px}
 
-/* steps */
-.steps{counter-reset:s;display:grid;gap:14px}
-.step{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
-.step::before{counter-increment:s;content:counter(s);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
-  background:linear-gradient(135deg,var(--blue),#7a4dff)}
-.step h3{margin:6px 0 6px;font-size:18px}
-.step p{margin:0 0 8px;color:var(--mute)}
-pre{position:relative;margin:8px 0 0;background:#070912;border:1px solid var(--line);border-radius:14px;padding:14px 16px;overflow-x:auto;font-size:13.5px;color:#d9e0ff}
-.copy{position:absolute;top:8px;right:8px;font:600 12px Outfit,sans-serif;color:var(--ink);background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
-.copy:hover{border-color:var(--blue2)}
+/* install: segmented button + panel */
+.seg{display:inline-flex;border:1px solid var(--outline);border-radius:20px;overflow:hidden;margin-bottom:24px}
+.seg button{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 18px;border:0;background:transparent;color:var(--on-surface);font:500 14px "Roboto Flex",sans-serif;cursor:pointer}
+.seg button+button{border-left:1px solid var(--outline)}
+.seg button[aria-selected="true"]{background:var(--secondary-c);color:var(--on-secondary-c)}
+.seg button .ms{font-size:18px;width:0;overflow:hidden;transition:width .25s var(--e-emph)}
+.seg button[aria-selected="true"] .ms{width:18px}
+.panel{background:var(--surface-low);border-radius:var(--shape-xl);padding:28px}
+.panel[hidden]{display:none}
+.panel.enter{animation:axis .35s var(--e-emph)}
+@keyframes axis{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.req{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+ol.flow{list-style:none;counter-reset:f;margin:0;padding:0;display:grid;gap:22px}
+ol.flow>li{counter-increment:f;display:grid;grid-template-columns:40px 1fr;gap:16px}
+ol.flow>li::before{content:counter(f);width:40px;height:40px;border-radius:20px;display:grid;place-items:center;background:var(--primary-c);color:var(--on-primary-c);font-weight:600}
+ol.flow h3{margin:7px 0 6px;font-size:17px;font-weight:550}
+ol.flow p{margin:0 0 10px;color:var(--on-surface-v)}
+.code{position:relative;background:#0C0E12;border-radius:var(--shape-m);border:1px solid var(--outline-v)}
+.code pre{margin:0;padding:16px 56px 16px 18px;overflow-x:auto;font:400 13.5px/1.6 "Roboto Mono",monospace;color:#DDE3F8}
+.code .iconbtn{position:absolute;top:8px;right:8px}
 
-/* tables */
-.specs{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.specs td{padding:13px 18px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:top}
-.specs tr:last-child td{border-bottom:0}
-.specs td:first-child{color:var(--mute);width:34%}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-ul.x,ul.ok{margin:0;padding:0;list-style:none}
-ul.x li,ul.ok li{padding:8px 0 8px 30px;position:relative;color:#d6dcff;border-bottom:1px dashed var(--line)}
-ul.x li:last-child,ul.ok li:last-child{border-bottom:0}
-ul.ok li::before{content:"✓";position:absolute;left:4px;color:var(--ok);font-weight:700}
-ul.x li::before{content:"✕";position:absolute;left:4px;color:var(--pink);font-weight:700}
+/* tips + support: two different surfaces on purpose */
+.split{display:grid;grid-template-columns:1.15fr .85fr;gap:24px}
+.tips{background:var(--surface-c);border-radius:var(--shape-xl);padding:8px}
+.tip{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:16px;border-radius:20px}
+.tip .ms{color:var(--primary);margin-top:2px}
+.tip b{display:block;font-weight:550;margin-bottom:2px}
+.tip span{color:var(--on-surface-v);font-size:15px}
+.tip code{font-family:"Roboto Mono",monospace;font-size:13px;background:var(--surface-highest);padding:1px 6px;border-radius:6px;color:var(--on-surface)}
+.support{border:1px solid var(--outline-v);border-radius:var(--shape-xl);padding:24px}
+.support h3{margin:0 0 10px;font-size:18px;font-weight:550;display:flex;gap:10px;align-items:center}
+.support ul{margin:0 0 22px;padding:0;list-style:none}
+.support li{display:flex;gap:10px;padding:7px 0;color:var(--on-surface-v)}
+.support li .ms{font-size:20px}
+.ok .ms{color:#8FD9A8}.no .ms{color:var(--tertiary)}
 
-.patch{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
-.patch:last-child{border-bottom:0}
-.patch .n{font-family:"JetBrains Mono",monospace;font-size:13px;color:#d9e0ff;word-break:break-all}
-.patch .r{font-size:12px;color:var(--mute)}
-.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
-.pill.g{background:#0d2a1e;color:var(--ok);border:1px solid #1b5a3d}
-.pill.y{background:#2a2108;color:var(--warn);border:1px solid #5a4210}
-.pill.r{background:#2a0d18;color:var(--pink);border:1px solid #5a1b33}
+/* build */
+.patches{display:grid;gap:8px;margin:0 0 24px}
+.patch{display:flex;gap:16px;align-items:center;background:var(--surface-low);border-radius:var(--shape-l);padding:16px 20px}
+.patch .ms{color:var(--primary)}
+.patch div{flex:1;min-width:0}
+.patch b{display:block;font-weight:500;font-size:15px;overflow-wrap:anywhere}
+.patch small{color:var(--outline);font-size:13.5px}
+.badge{flex:none;font-size:12.5px;font-weight:600;height:28px;padding:0 12px;border-radius:14px;display:inline-flex;align-items:center}
+.badge.g{background:#0E3A23;color:#9BE6B4}.badge.y{background:var(--caution-c);color:var(--on-caution-c)}.badge.r{background:var(--tertiary-c);color:var(--on-tertiary-c)}
 
-.disclaimer{border:1px solid #5a4210;background:linear-gradient(180deg,#1d1606,#120e05);border-radius:var(--r);padding:26px}
-.disclaimer h2{color:var(--warn);font-size:28px}
-.disclaimer p{color:#f1dcb0;margin:8px 0}
-footer{padding:40px 0 60px;color:var(--mute);font-size:14px;border-top:1px solid var(--line);margin-top:30px}
+/* faq: M3 expandable list */
+.faq{border-top:1px solid var(--outline-v)}
+.faq details{border-bottom:1px solid var(--outline-v)}
+.faq summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:16px;padding:20px 8px;font-size:17px;font-weight:500}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary .ms{margin-left:auto;color:var(--on-surface-v);transition:transform .3s var(--e-emph)}
+.faq details[open] summary .ms{transform:rotate(180deg)}
+.faq .ans{padding:0 8px 22px;color:var(--on-surface-v);max-width:72ch}
 
-@media (max-width:900px){
-  .hero{grid-template-columns:1fr;gap:40px;padding-top:20px}
-  .grid{grid-template-columns:1fr 1fr}
-  .cols{grid-template-columns:1fr}
-  nav .links{display:none}
+.notice{background:var(--surface-c);border-radius:var(--shape-xl);padding:32px;display:grid;grid-template-columns:56px 1fr;gap:20px}
+.notice .big{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--caution-c);color:var(--caution)}
+.notice h2{font-size:28px;margin-bottom:8px}
+.notice p{margin:0 0 10px;color:var(--on-surface-v);max-width:76ch}
+footer{color:var(--outline);font-size:14px;padding:32px 0 56px}
+footer a{color:var(--on-surface-v)}
+
+/* load + reveal motion */
+.rise{opacity:0;transform:translateY(16px)}
+.ready .rise{animation:rise .8s var(--e-emph) forwards;animation-delay:calc(var(--i,0) * 70ms)}
+@keyframes rise{to{opacity:1;transform:none}}
+.ready .device{animation:device 1.1s var(--e-emph) .15s both}
+@keyframes device{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .7s var(--e-emph),transform .7s var(--e-emph)}
+.reveal.in{opacity:1;transform:none}
+
+@media (max-width:960px){
+  .hero{grid-template-columns:1fr;gap:44px;padding-top:36px}
+  .split{grid-template-columns:1fr}
+  .feat{grid-template-columns:1fr}
+  .nav{display:none}
 }
 @media (max-width:560px){
-  .grid{grid-template-columns:1fr}
   .wrap{padding:0 16px}
-  .step{grid-template-columns:1fr}
-  .patch{flex-direction:column;align-items:flex-start}
+  .panel,.notice{padding:20px}
+  .notice{grid-template-columns:1fr}
+  .shot{width:168px}
+  .patch{flex-wrap:wrap}
 }
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rise,.reveal{opacity:1;transform:none;animation:none!important;transition:none}
+  .ready .device{animation:none}
+  .track{animation:none}
+  .marquee{overflow-x:auto;scrollbar-width:none}
+  .marquee::-webkit-scrollbar{display:none}
+  .device .screen img{transition:none}
+}
 </style>
 </head>
 <body>
-<div class="banner"><b>UNOFFICIAL</b> community build, not made or supported by the Project Infinity X team. For developer testing only.</div>
-<div class="glow"></div><div class="glow b"></div>
-
-<header class="wrap">
-  <nav>
-    <div class="logo"><span class="inf">∞</span><span>Infinity X · Emulator <span style="color:var(--mute);font-weight:400">(unofficial)</span></span></div>
-    <div class="links"><a href="#screens">Screens</a><a href="#install">Install</a><a href="#tips">Tips</a><a href="#build">Build</a><a href="#faq">FAQ</a></div>
-  </nav>
+<header class="appbar" id="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="ms" aria-hidden="true">all_inclusive</span>Infinity X emulator image</a>
+    <nav class="nav" aria-label="Sections"><a href="#screens">Screenshots</a><a href="#install">Install</a><a href="#tips">Tips</a><a href="#build">Build</a><a href="#faq">FAQ</a></nav>
+  </div>
 </header>
 
 <main class="wrap">
-  <section class="hero" style="padding-top:20px">
+  <div class="banner rise" style="--i:0" role="note">
+    <span class="ms" aria-hidden="true">info</span>
+    <p><b>Unofficial build.</b> Not made, endorsed or supported by the Project Infinity X team. It exists to help developers test apps and features faster. Please don't ask the official Infinity X groups for help with it.</p>
+  </div>
+
+  <section class="hero" style="padding-top:48px">
     <div>
-      <span class="tag">⚠ Unofficial · Developer build</span>
-      <h1><span class="grad">Infinity X 4.1</span><br>on your desktop<span class="x">.</span></h1>
-      <p class="lead">An x86_64 Android&nbsp;17 system image of Project Infinity X for the Android Emulator. Test apps, themes and UI features in seconds instead of flashing a phone.</p>
-      <div class="chips">
-        <span class="chip">Android 17 · API 37</span><span class="chip">Patch 2026‑10‑01</span><span class="chip">x86_64</span><span class="chip">userdebug</span><span class="chip">Vanilla · no GApps</span><span class="chip">~1.1 GB download</span>
+      <h1 class="rise" style="--i:1">Infinity X 4.1 <small>in the Android Emulator, on any x86_64 PC</small></h1>
+      <p class="lead rise" style="--i:2">An Android 17 system image built from the Infinity X sources for testing apps, themes and SystemUI changes in seconds, without unlocking or flashing a phone.</p>
+      <div class="chipset rise" style="--i:3">
+        <span class="chip warn"><span class="ms" aria-hidden="true">science</span>Unofficial</span>
+        <span class="chip"><span class="ms" aria-hidden="true">android</span>Android 17, API 37</span>
+        <span class="chip"><span class="ms" aria-hidden="true">verified_user</span>Patch 2026‑10‑01</span>
+        <span class="chip"><span class="ms" aria-hidden="true">memory</span>x86_64 userdebug</span>
+        <span class="chip"><span class="ms" aria-hidden="true">block</span>No Google apps</span>
       </div>
-      <div class="cta">
-        <a class="btn primary" href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/releases/latest">⬇ Download image</a>
-        <a class="btn ghost" href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial">GitHub repo</a>
+      <div class="actions rise" style="--i:4">
+        <a class="btn filled" href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/releases/latest"><span class="ms" aria-hidden="true">download</span>Download image (1.1 GB)</a>
+        <a class="btn tonal" href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial"><span class="ms" aria-hidden="true">code</span>View on GitHub</a>
       </div>
-      <div class="sha">SHA‑256 <b class="mono">e6aafcddcfd24e1204c0ea35f10cfa737d955147a40bc75831d5651b0816df60</b></div>
+      <div class="hash rise" style="--i:5">SHA‑256 <code id="sha">e6aafcddcfd24e1204c0ea35f10cfa737d955147a40bc75831d5651b0816df60</code>
+        <button class="iconbtn" data-copy="#sha" aria-label="Copy SHA-256"><span class="ms" aria-hidden="true">content_copy</span></button></div>
     </div>
-    <div class="phone"><img src="assets/lockscreen.webp" alt="Infinity X lockscreen running in the Android Emulator" width="540" height="1200"></div>
-  </section>
-
-  <section id="screens">
-    <h2>Real screenshots</h2>
-    <p class="sub">Captured from this exact image in the Android Emulator, with nothing edited.</p>
-    <div class="gallery">
-      <figure><img src="assets/lockscreen.webp" alt="Lockscreen with the Infinity X clock" loading="lazy"><figcaption>Lockscreen</figcaption></figure>
-      <figure><img src="assets/settings.webp" alt="Settings home with the Infinity X header" loading="lazy"><figcaption>Settings</figcaption></figure>
-      <figure><img src="assets/infinity-suite.webp" alt="Infinity Suite customization hub" loading="lazy"><figcaption>Infinity Suite</figcaption></figure>
-      <figure><img src="assets/quicksettings.webp" alt="Quick settings panel" loading="lazy"><figcaption>Quick settings</figcaption></figure>
-      <figure><img src="assets/apps.webp" alt="Launcher app drawer" loading="lazy"><figcaption>Launcher3</figcaption></figure>
-    </div>
-  </section>
-
-  <section>
-    <h2>What it's good for</h2>
-    <p class="sub">Anything that lives in the framework, SystemUI, Settings or launcher.</p>
-    <div class="grid">
-      <div class="card"><div class="ico">🎨</div><h3>Themes &amp; overlays</h3><p>Infinity Suite, Monet, QS styles, lockscreen clocks, icon packs and fonts, all working.</p></div>
-      <div class="card"><div class="ico">🪟</div><h3>Freeform &amp; sidebar</h3><p>Test how your app behaves in floating windows and the sidebar without a device.</p></div>
-      <div class="card"><div class="ico">☝</div><h3>Fingerprint flows</h3><p>Ten virtual fingers in the emulator's extended controls, useful for per-finger logic.</p></div>
-      <div class="card"><div class="ico">🧩</div><h3>App compatibility</h3><p>Check your app on Android 17 with a custom-ROM framework before your users do.</p></div>
-      <div class="card"><div class="ico">🛠</div><h3>ROM development</h3><p>Reproduce SystemUI or Settings bugs and test patches, with <code>adb</code>, logcat and a userdebug build.</p></div>
-      <div class="card"><div class="ico">⚡</div><h3>Fast iteration</h3><p>Cold boot in about a minute on a laptop, with no unlocking, flashing or bricking risk.</p></div>
+    <div>
+      <div class="device" aria-label="Screenshots from the emulator" role="img">
+        <div class="screen" id="screen">
+          <img class="on" src="assets/lockscreen.webp" alt="" width="540" height="1200">
+          <img src="assets/settings.webp" alt="" width="540" height="1200" loading="lazy">
+          <img src="assets/infinity-suite.webp" alt="" width="540" height="1200" loading="lazy">
+          <img src="assets/quicksettings.webp" alt="" width="540" height="1200" loading="lazy">
+          <img src="assets/apps.webp" alt="" width="540" height="1200" loading="lazy">
+        </div>
+        <span class="btns" aria-hidden="true"></span>
+      </div>
+      <div class="dots" id="dots" aria-label="Choose screenshot"></div>
     </div>
   </section>
 
-  <section id="install">
-    <h2>Install</h2>
-    <p class="sub">x86_64 host with hardware virtualization (KVM / HVF / WHPX), Android SDK with Emulator 36+, <code>zstd</code>, 8 GB RAM and ~10 GB free disk. Apple Silicon Macs can't run x86_64 images.</p>
-    <div class="steps">
-      <div class="step"><div><h3>Download the image</h3><p>Grab <span class="mono">InfinityX-4.1-UNOFFICIAL-emulator-x86_64-20261024.tar.zst</span> from the <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/releases/latest">latest release</a>.</p></div></div>
-      <div class="step"><div><h3>Run the installer (Linux / Intel macOS)</h3><p>It checks the SHA‑256, extracts the image into your SDK and creates an AVD named <code>InfinityX</code>.</p>
-<pre><button class="copy">Copy</button>git clone https://github.com/Necta14/infinityx-emulator-x86_64-unofficial
-cd infinityx-emulator-x86_64-unofficial
-./scripts/install.sh ~/Downloads/InfinityX-4.1-UNOFFICIAL-emulator-x86_64-20261024.tar.zst</pre></div></div>
-      <div class="step"><div><h3>Start it</h3>
-<pre><button class="copy">Copy</button>$ANDROID_SDK_ROOT/emulator/emulator -avd InfinityX</pre>
-<p style="margin-top:10px">Windows (untested): extract with a Zstandard-capable tool into <span class="mono">…\Sdk\system-images\android-37\infinityx\</span> and create the AVD files shown in <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/scripts/install.sh">install.sh</a>.</p></div></div>
-    </div>
-  </section>
-
-  <section id="tips">
-    <h2>Tips</h2>
-    <p class="sub">Small things that save time.</p>
-    <table class="specs">
-      <tr><td>Black screen / artifacts</td><td>Start with <code>-gpu host</code>, or <code>-gpu swiftshader_indirect</code> as a fallback.</td></tr>
-      <tr><td>Start clean</td><td><code>-wipe-data</code> resets the AVD; <code>-no-snapshot</code> forces a cold boot.</td></tr>
-      <tr><td>Fingerprints</td><td>Extended controls (<b>…</b>) → <b>Fingerprint</b>: enroll several fingers and touch the virtual sensor.</td></tr>
-      <tr><td>Root shell</td><td>userdebug build, so try <code>adb root</code> first.</td></tr>
-      <tr><td>No setup wizard</td><td>Normal for a vanilla build. It boots straight into the launcher.</td></tr>
-      <tr><td>Performance</td><td>Give the AVD 4 cores and 4 GB of RAM (the defaults the installer sets), and keep the image on an SSD.</td></tr>
-    </table>
-  </section>
-
-  <section>
-    <div class="cols">
-      <div class="card"><h3>Works</h3><ul class="ok">
-        <li>Infinity Suite and theming</li><li>Launcher3, QS panel, lockscreen</li><li>Freeform windows and sidebar</li><li>Settings, Game Space, Recorder</li><li>adb, logcat, virtual sensors</li></ul></div>
-      <div class="card"><h3>Not included / won't work</h3><ul class="x">
-        <li>Google apps and Play Store (vanilla)</li><li>FaceUnlock (ARM-only libraries)</li><li>Real camera, Dolby, device features</li><li>Official signing keys and OTA</li><li>Running on real phones (emulator only!)</li></ul></div>
-    </div>
-  </section>
-
-  <section id="build">
-    <h2>Build it yourself</h2>
-    <p class="sub">The upstream emulator target didn't build out of the box. The full story and the five fixes are in <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/BUILD.md">BUILD.md</a>.</p>
-    <div class="card" style="padding:0">
-      <div class="patch"><div><div class="n">0001-sdk_phone_x86_64-make-the-emulator-target-build-as-I…</div><div class="r">vendor/infinity · wrong include, Lineage product name, artifact path check</div></div><span class="pill g">Upstream-ready</span></div>
-      <div class="patch"><div><div class="n">0001-emu64x-tolerate-missing-ARM-only-required-modules</div><div class="r">device/generic/goldfish · FaceUnlock's ARM-only prebuilts</div></div><span class="pill y">Emulator only</span></div>
-      <div class="patch"><div><div class="n">0002-LOCAL-ONLY-DO-NOT-MERGE-common-default-FaceUnlock…</div><div class="r">vendor/infinity · applied in this build, not needed, changes every device</div></div><span class="pill r">Local only</span></div>
-    </div>
-<pre><button class="copy">Copy</button>scripts/apply-fixes.sh /path/to/infinity-x-src
-source build/envsetup.sh &amp;&amp; lunch infinity_sdk_phone_x86_64-userdebug
-export INFINITY_BUILD=emu64x   # avoids duplicate ro.infinity.device
-m &amp;&amp; scripts/pack-emulator-image.sh out/target/product/emu64x ./dist</pre>
-  </section>
-
-  <section id="faq">
-    <h2>FAQ</h2>
-    <table class="specs">
-      <tr><td>Is this official?</td><td><b>No.</b> It is an unofficial community build. Please don't ask the Infinity X groups for support with it.</td></tr>
-      <tr><td>Can I flash it on my phone?</td><td>No. It is built for the emulator's virtual hardware only.</td></tr>
-      <tr><td>Is it safe?</td><td>Built from public sources with the patches published here. Verify the SHA‑256 and inspect the build notes. It is not signed with official keys.</td></tr>
-      <tr><td>Found a bug?</td><td>Check it on a real device first. If it only happens here, open an issue in this repo.</td></tr>
-      <tr><td>Kernel source?</td><td>See <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/NOTICE.md">NOTICE.md</a> (Android Common Kernel 6.12.58).</td></tr>
-    </table>
-  </section>
-
-  <section>
-    <div class="disclaimer">
-      <h2>Unofficial. Please read.</h2>
-      <p>This image is <b>not</b> made, endorsed or supported by the Project Infinity X team, LineageOS or Google. It exists to help developers test apps and features faster. Use it at your own risk and never as a daily driver.</p>
-      <p>All credit for Infinity X goes to its team and contributors. If you like what you see here, support the <a href="https://projectinfinity-x.com">official project</a>. "Infinity X" names belong to their owners and are used only to describe what this build is based on.</p>
+  <section id="screens" style="padding-bottom:24px">
+    <div class="reveal">
+      <h2>Screenshots</h2>
+      <p class="sub">Captured from this exact image in the Android Emulator, unedited. Hover to pause.</p>
     </div>
   </section>
 </main>
 
-<footer class="wrap">
-  Unofficial build by <a href="https://github.com/Necta14">Necta14</a> · Built 2026‑10‑24 from Project Infinity X 4.1 sources ·
-  Scripts &amp; docs Apache‑2.0 · <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/NOTICE.md">Notices &amp; licenses</a>
-</footer>
+<div class="marquee reveal" id="marquee" tabindex="0" aria-label="Screenshots, scrolling automatically">
+  <div class="track" id="track">
+    <figure class="shot"><div class="frame"><img src="assets/lockscreen.webp" alt="Lockscreen with the Infinity X clock" width="540" height="1200" loading="lazy"></div><figcaption>Lockscreen</figcaption></figure>
+    <figure class="shot"><div class="frame"><img src="assets/settings.webp" alt="Settings with the Infinity X header" width="540" height="1200" loading="lazy"></div><figcaption>Settings</figcaption></figure>
+    <figure class="shot"><div class="frame"><img src="assets/infinity-suite.webp" alt="Infinity Suite customization hub" width="540" height="1200" loading="lazy"></div><figcaption>Infinity Suite</figcaption></figure>
+    <figure class="shot"><div class="frame"><img src="assets/quicksettings.webp" alt="Quick settings panel" width="540" height="1200" loading="lazy"></div><figcaption>Quick settings</figcaption></figure>
+    <figure class="shot"><div class="frame"><img src="assets/apps.webp" alt="Launcher3 app drawer" width="540" height="1200" loading="lazy"></div><figcaption>App drawer</figcaption></figure>
+  </div>
+</div>
+
+<div class="wrap">
+  <section>
+    <div class="reveal">
+      <h2>What you can test</h2>
+      <p class="sub">Anything that lives in the framework, SystemUI, Settings or the launcher.</p>
+    </div>
+    <ul class="feat">
+      <li class="reveal"><span class="ic ms" aria-hidden="true">palette</span><div><h3>Themes and overlays</h3><p>Infinity Suite, Monet colors, QS styles, lockscreen clocks, icon packs and fonts.</p></div></li>
+      <li class="reveal"><span class="ic ms" aria-hidden="true">picture_in_picture</span><div><h3>Freeform windows and sidebar</h3><p>See how your app behaves in floating windows without a device on your desk.</p></div></li>
+      <li class="reveal"><span class="ic ms" aria-hidden="true">fingerprint</span><div><h3>Fingerprint flows</h3><p>The emulator has ten virtual fingers, enough to test per-finger behaviour.</p></div></li>
+      <li class="reveal"><span class="ic ms" aria-hidden="true">apps</span><div><h3>App compatibility</h3><p>Run your app on Android 17 with a custom ROM framework before your users do.</p></div></li>
+      <li class="reveal"><span class="ic ms" aria-hidden="true">bug_report</span><div><h3>ROM debugging</h3><p>Reproduce SystemUI or Settings bugs with adb, logcat and a userdebug build.</p></div></li>
+      <li class="reveal"><span class="ic ms" aria-hidden="true">bolt</span><div><h3>Fast iteration</h3><p>Cold boot in about a minute on a laptop, with no risk to a real phone.</p></div></li>
+    </ul>
+  </section>
+
+  <section id="install">
+    <div class="reveal">
+      <h2>Install</h2>
+      <p class="sub">You need an x86_64 computer with hardware virtualization, the Android SDK with Emulator 36 or newer, and about 10 GB of free disk space. Apple Silicon Macs can't run x86_64 images.</p>
+    </div>
+    <div class="reveal">
+      <div class="seg" role="tablist" aria-label="Operating system">
+        <button role="tab" aria-selected="true" aria-controls="p-linux" id="t-linux"><span class="ms" aria-hidden="true">check</span>Linux and Intel macOS</button>
+        <button role="tab" aria-selected="false" aria-controls="p-win" id="t-win"><span class="ms" aria-hidden="true">check</span>Windows</button>
+      </div>
+      <div class="panel" id="p-linux" role="tabpanel" aria-labelledby="t-linux">
+        <ol class="flow">
+          <li><div><h3>Download the image</h3><p>Get <code>InfinityX-4.1-UNOFFICIAL-emulator-x86_64-20261024.tar.zst</code> from the <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/releases/latest">latest release</a>.</p></div></li>
+          <li><div><h3>Run the installer</h3><p>It checks the SHA‑256, extracts the image into your SDK and creates an AVD called InfinityX.</p>
+            <div class="code"><pre id="c1">git clone https://github.com/Necta14/infinityx-emulator-x86_64-unofficial
+cd infinityx-emulator-x86_64-unofficial
+./scripts/install.sh ~/Downloads/InfinityX-4.1-UNOFFICIAL-emulator-x86_64-20261024.tar.zst</pre><button class="iconbtn" data-copy="#c1" aria-label="Copy commands"><span class="ms" aria-hidden="true">content_copy</span></button></div></div></li>
+          <li><div><h3>Start the emulator</h3>
+            <div class="code"><pre id="c2">$ANDROID_SDK_ROOT/emulator/emulator -avd InfinityX</pre><button class="iconbtn" data-copy="#c2" aria-label="Copy command"><span class="ms" aria-hidden="true">content_copy</span></button></div></div></li>
+        </ol>
+      </div>
+      <div class="panel" id="p-win" role="tabpanel" aria-labelledby="t-win" hidden>
+        <ol class="flow">
+          <li><div><h3>Enable virtualization</h3><p>Turn on Windows Hypervisor Platform (WHPX) or install the AEHD driver from the SDK Manager.</p></div></li>
+          <li><div><h3>Extract the image</h3><p>Use a tool that reads Zstandard archives, such as tar from Git Bash or WSL, PeaZip or 7‑Zip ZS. Extract into:</p>
+            <div class="code"><pre id="c3">%LOCALAPPDATA%\Android\Sdk\system-images\android-37\infinityx\</pre><button class="iconbtn" data-copy="#c3" aria-label="Copy path"><span class="ms" aria-hidden="true">content_copy</span></button></div></div></li>
+          <li><div><h3>Create the AVD files</h3><p>Copy the two files that <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/scripts/install.sh">install.sh</a> writes into <code>%USERPROFILE%\.android\avd\</code>, then start <code>emulator -avd InfinityX</code>. These Windows steps haven't been tested yet.</p></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="tips">
+    <div class="reveal">
+      <h2>Tips</h2>
+      <p class="sub">Small things that save time.</p>
+    </div>
+    <div class="split">
+      <div class="tips reveal">
+        <div class="tip"><span class="ms" aria-hidden="true">monitor</span><div><b>Black screen or glitches</b><span>Start with <code>-gpu host</code>, or <code>-gpu swiftshader_indirect</code> as a fallback.</span></div></div>
+        <div class="tip"><span class="ms" aria-hidden="true">restart_alt</span><div><b>Start clean</b><span><code>-wipe-data</code> resets the AVD and <code>-no-snapshot</code> forces a cold boot.</span></div></div>
+        <div class="tip"><span class="ms" aria-hidden="true">fingerprint</span><div><b>Virtual fingerprints</b><span>Extended controls, then Fingerprint. Enroll several fingers and touch the sensor.</span></div></div>
+        <div class="tip"><span class="ms" aria-hidden="true">terminal</span><div><b>Root shell</b><span>It's a userdebug build, so try <code>adb root</code> first.</span></div></div>
+        <div class="tip"><span class="ms" aria-hidden="true">rocket_launch</span><div><b>No setup wizard</b><span>Normal without Google apps. It boots straight into the launcher.</span></div></div>
+      </div>
+      <div class="support reveal">
+        <h3 class="ok"><span class="ms" aria-hidden="true">check_circle</span>Works</h3>
+        <ul class="ok">
+          <li><span class="ms" aria-hidden="true">check</span>Infinity Suite and theming</li>
+          <li><span class="ms" aria-hidden="true">check</span>Launcher3, QS panel, lockscreen</li>
+          <li><span class="ms" aria-hidden="true">check</span>Freeform windows and sidebar</li>
+          <li><span class="ms" aria-hidden="true">check</span>adb, logcat, virtual sensors</li>
+        </ul>
+        <h3 class="no"><span class="ms" aria-hidden="true">cancel</span>Not included</h3>
+        <ul class="no" style="margin-bottom:0">
+          <li><span class="ms" aria-hidden="true">close</span>Google apps and Play Store</li>
+          <li><span class="ms" aria-hidden="true">close</span>FaceUnlock (ARM-only libraries)</li>
+          <li><span class="ms" aria-hidden="true">close</span>Real camera, Dolby, device features</li>
+          <li><span class="ms" aria-hidden="true">close</span>Official signing keys and OTA</li>
+          <li><span class="ms" aria-hidden="true">close</span>Flashing on real phones</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="build">
+    <div class="reveal">
+      <h2>Build it yourself</h2>
+      <p class="sub">The upstream emulator target didn't build as-is. <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/BUILD.md">BUILD.md</a> explains the five problems and how each was fixed.</p>
+    </div>
+    <div class="patches">
+      <div class="patch reveal"><span class="ms" aria-hidden="true">difference</span><div><b>Make the emulator target build as Infinity X</b><small>vendor/infinity: wrong include, LineageOS product name, artifact path check</small></div><span class="badge g">Ready for upstream</span></div>
+      <div class="patch reveal"><span class="ms" aria-hidden="true">difference</span><div><b>Tolerate ARM-only required modules</b><small>device/generic/goldfish: FaceUnlock prebuilts exist only for ARM</small></div><span class="badge y">Emulator only</span></div>
+      <div class="patch reveal"><span class="ms" aria-hidden="true">difference</span><div><b>Default FaceUnlock to off</b><small>vendor/infinity: was applied in this build but isn't needed, and it affects every device</small></div><span class="badge r">Don't merge</span></div>
+    </div>
+    <div class="code reveal"><pre id="c4">scripts/apply-fixes.sh /path/to/infinity-x-src
+source build/envsetup.sh && lunch infinity_sdk_phone_x86_64-userdebug
+export INFINITY_BUILD=emu64x   # avoids a duplicate ro.infinity.device
+m && scripts/pack-emulator-image.sh out/target/product/emu64x ./dist</pre><button class="iconbtn" data-copy="#c4" aria-label="Copy build commands"><span class="ms" aria-hidden="true">content_copy</span></button></div>
+  </section>
+
+  <section id="faq">
+    <div class="reveal"><h2>Questions</h2></div>
+    <div class="faq reveal">
+      <details><summary>Is this official?<span class="ms" aria-hidden="true">expand_more</span></summary><div class="ans">No. It's an unofficial community build. The Infinity X team doesn't support it, so please don't report its issues in their groups.</div></details>
+      <details><summary>Can I flash it on my phone?<span class="ms" aria-hidden="true">expand_more</span></summary><div class="ans">No. It's built for the emulator's virtual hardware only and won't boot on a real device.</div></details>
+      <details><summary>Is it safe to run?<span class="ms" aria-hidden="true">expand_more</span></summary><div class="ans">It's built from public sources plus the patches published in the repository. Check the SHA‑256 before installing. It isn't signed with the official Infinity X keys.</div></details>
+      <details><summary>I found a bug. Where do I report it?<span class="ms" aria-hidden="true">expand_more</span></summary><div class="ans">Check it on a real device first. If it only happens in the emulator, open an issue in this repository.</div></details>
+      <details><summary>Where is the kernel source?<span class="ms" aria-hidden="true">expand_more</span></summary><div class="ans">The image uses the AOSP prebuilt emulator kernel, Android Common Kernel 6.12.58. <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/NOTICE.md">NOTICE.md</a> links the exact source.</div></details>
+    </div>
+  </section>
+
+  <section>
+    <div class="notice reveal">
+      <span class="big ms" aria-hidden="true">science</span>
+      <div>
+        <h2>Unofficial, for development only</h2>
+        <p>This image isn't made, endorsed or supported by the Project Infinity X team, LineageOS or Google. Use it to test apps and features, at your own risk, and never as a daily system.</p>
+        <p>All credit for Infinity X goes to its team and contributors. If you like it, support the <a href="https://projectinfinity-x.com">official project</a>. The Infinity X name belongs to its owners and is used here only to say what this build is based on.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer class="wrap">Unofficial build by <a href="https://github.com/Necta14">Necta14</a>, made on 24 October 2026 from the Infinity X 4.1 sources. Scripts and docs are Apache‑2.0. See <a href="https://github.com/Necta14/infinityx-emulator-x86_64-unofficial/blob/main/NOTICE.md">notices and licenses</a>.</footer>
 
 <script>
-document.querySelectorAll('pre .copy').forEach(function(b){
-  b.addEventListener('click',function(){
-    var t=b.parentElement.innerText.replace(/^Copy\s*/,'').replace(/^Copied\s*/,'');
-    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){
-      b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400);
-    }).catch(function(){b.textContent='Select & copy';});
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  requestAnimationFrame(function(){ document.body.classList.add('ready'); });
+
+  // top app bar elevation on scroll
+  var bar = document.querySelector('.appbar');
+  addEventListener('scroll', function(){ bar.classList.toggle('scrolled', scrollY > 8); }, {passive:true});
+
+  // reveal on scroll
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el, i){
+    if (reduce) { el.classList.add('in'); return; }
+    var sib = el.parentElement.querySelectorAll(':scope > .reveal');
+    el.style.transitionDelay = (Array.prototype.indexOf.call(sib, el) * 60) + 'ms';
+    io.observe(el);
   });
-});
+
+  // device: cycle screenshots
+  var imgs = document.querySelectorAll('#screen img'), dots = document.getElementById('dots'), cur = 0, timer;
+  var names = ['Lockscreen','Settings','Infinity Suite','Quick settings','App drawer'];
+  imgs.forEach(function(_, i){
+    var b = document.createElement('button'); b.setAttribute('aria-label', names[i]); if(!i) b.className = 'on';
+    b.addEventListener('click', function(){ show(i); restart(); }); dots.appendChild(b);
+  });
+  function show(i){ imgs[cur].classList.remove('on'); dots.children[cur].classList.remove('on'); cur = i; imgs[cur].classList.add('on'); dots.children[cur].classList.add('on'); }
+  function restart(){ clearInterval(timer); if(!reduce) timer = setInterval(function(){ show((cur + 1) % imgs.length); }, 3600); }
+  restart();
+
+  // marquee: duplicate the set so the loop is seamless
+  var track = document.getElementById('track');
+  if (!reduce) {
+    var items = Array.prototype.slice.call(track.children), first = null;
+    function addSet(){ items.forEach(function(n, i){ var c = n.cloneNode(true); c.setAttribute('aria-hidden','true'); track.appendChild(c); if(!first && !i) first = c; }); }
+    addSet();
+    var setW = first.offsetLeft - items[0].offsetLeft;
+    while (track.scrollWidth < innerWidth + setW + 40) addSet();
+    track.style.setProperty('--shift', (-setW) + 'px');
+    track.style.setProperty('--dur', Math.round(setW / 45) + 's');
+  }
+
+  // segmented button
+  var tabs = document.querySelectorAll('.seg button');
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(o){ o.setAttribute('aria-selected', o === t); document.getElementById(o.getAttribute('aria-controls')).hidden = o !== t; });
+      var p = document.getElementById(t.getAttribute('aria-controls'));
+      p.classList.remove('enter'); void p.offsetWidth; if(!reduce) p.classList.add('enter');
+    });
+  });
+
+  // copy buttons
+  document.querySelectorAll('[data-copy]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var t = document.querySelector(b.getAttribute('data-copy')).innerText, ic = b.querySelector('.ms');
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){
+        ic.textContent = 'check'; setTimeout(function(){ ic.textContent = 'content_copy'; }, 1500);
+      }).catch(function(){ ic.textContent = 'error'; });
+    });
+  });
+
+  // M3 ripple on pointer down
+  document.querySelectorAll('.btn, .iconbtn, .seg button, .nav a').forEach(function(el){
+    el.addEventListener('pointerdown', function(e){
+      if (reduce) return;
+      var r = el.getBoundingClientRect(), s = Math.max(r.width, r.height) * 2, d = document.createElement('span');
+      d.className = 'ripple'; d.style.width = d.style.height = s + 'px';
+      d.style.left = (e.clientX - r.left - s / 2) + 'px'; d.style.top = (e.clientY - r.top - s / 2) + 'px';
+      el.appendChild(d); setTimeout(function(){ d.remove(); }, 600);
+    });
+  });
+})();
 </script>
 </body>
 </html>
