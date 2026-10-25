@@ -27,6 +27,7 @@
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--surface);color:var(--on-surface);font:400 16px/1.55 "Roboto Flex",Roboto,system-ui,sans-serif;font-variation-settings:"opsz" 16}
 a{color:var(--primary)}
+p code,li code,.ans code{overflow-wrap:anywhere}
 .ms{font-family:"Material Symbols Rounded";font-weight:400;font-style:normal;font-size:24px;line-height:1;display:inline-block;-webkit-font-smoothing:antialiased;font-variation-settings:"FILL" 0,"wght" 400,"opsz" 24;user-select:none}
 .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
 :focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:6px}
@@ -101,7 +102,7 @@ h2{font-weight:600;font-size:clamp(30px,3.6vw,44px);line-height:1.1;letter-spaci
 
 /* feature list: M3 list, two columns */
 .feat{display:grid;grid-template-columns:1fr 1fr;gap:4px 32px;margin:0;padding:0;list-style:none}
-.feat li{display:grid;grid-template-columns:48px 1fr;gap:16px;padding:16px 8px;border-radius:var(--shape-m);align-items:start}
+.feat li{display:grid;grid-template-columns:48px minmax(0,1fr);gap:16px;padding:16px 8px;border-radius:var(--shape-m);align-items:start}
 .feat .ic{width:48px;height:48px;border-radius:var(--shape-m);display:grid;place-items:center;background:var(--primary-c);color:var(--on-primary-c)}
 .feat h3{margin:2px 0 4px;font-size:18px;font-weight:550}
 .feat p{margin:0;color:var(--on-surface-v);font-size:15px}
@@ -119,7 +120,7 @@ h2{font-weight:600;font-size:clamp(30px,3.6vw,44px);line-height:1.1;letter-spaci
 @keyframes axis{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
 .req{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
 ol.flow{list-style:none;counter-reset:f;margin:0;padding:0;display:grid;gap:22px}
-ol.flow>li{counter-increment:f;display:grid;grid-template-columns:40px 1fr;gap:16px}
+ol.flow>li{counter-increment:f;display:grid;grid-template-columns:40px minmax(0,1fr);gap:16px}
 ol.flow>li::before{content:counter(f);width:40px;height:40px;border-radius:20px;display:grid;place-items:center;background:var(--primary-c);color:var(--on-primary-c);font-weight:600}
 ol.flow h3{margin:7px 0 6px;font-size:17px;font-weight:550}
 ol.flow p{margin:0 0 10px;color:var(--on-surface-v)}
@@ -130,7 +131,7 @@ ol.flow p{margin:0 0 10px;color:var(--on-surface-v)}
 /* tips + support: two different surfaces on purpose */
 .split{display:grid;grid-template-columns:1.15fr .85fr;gap:24px}
 .tips{background:var(--surface-c);border-radius:var(--shape-xl);padding:8px}
-.tip{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:16px;border-radius:20px}
+.tip{display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:16px;border-radius:20px}
 .tip .ms{color:var(--primary);margin-top:2px}
 .tip b{display:block;font-weight:550;margin-bottom:2px}
 .tip span{color:var(--on-surface-v);font-size:15px}
@@ -161,7 +162,7 @@ ol.flow p{margin:0 0 10px;color:var(--on-surface-v)}
 .faq details[open] summary .ms{transform:rotate(180deg)}
 .faq .ans{padding:0 8px 22px;color:var(--on-surface-v);max-width:72ch}
 
-.notice{background:var(--surface-c);border-radius:var(--shape-xl);padding:32px;display:grid;grid-template-columns:56px 1fr;gap:20px}
+.notice{background:var(--surface-c);border-radius:var(--shape-xl);padding:32px;display:grid;grid-template-columns:56px minmax(0,1fr);gap:20px}
 .notice .big{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--caution-c);color:var(--caution)}
 .notice h2{font-size:28px;margin-bottom:8px}
 .notice p{margin:0 0 10px;color:var(--on-surface-v);max-width:76ch}
